@@ -1,3 +1,6 @@
+// Board squares
+const boardSquares = document.querySelectorAll(".square")
+
 const Player = () => {
     const makeMove = (x, y) => {
         GameBoard.addMark(x, y)
@@ -38,5 +41,18 @@ const GameBoard = (() => {
 
 const NewGame = (() => {
     console.log("Game Started!")
-    GameBoard.displayBoard()
+    boardSquares.forEach(item => {
+        item.addEventListener("click", (event) => {
+            // radio_button_unchecked or close
+            // #226F54 or #43291F
+            const marker = document.createElement("span")
+            marker.classList.add("material-symbols-outlined")
+            marker.setAttribute("style", "color:#43291F")
+            marker.textContent = "radio_button_unchecked"
+            
+            event.target.appendChild(marker)
+        })
+    })
+
+
 })();
