@@ -1,70 +1,100 @@
-// Board squares
-const boardSquares = document.querySelectorAll(".square")
-let crossBtn = document.querySelector(".cross")
-let circleBtn = document.querySelector(".circle")
-
-const Cell = () => {
-    let value = 0
-    const getValue = () => value 
-    const setValue = val => value = val
-    return {getValue, setValue}
-}
-
-const Player = (name, markerId) => {
-    const getPlayerInfo = () => {
-        return {name, markerId}
+const GameBoard = () => {
+    const board = ["","","","","","","","",""]
+    
+    const makeMove = (player, index) => {
+        board[index] = player
     }
 
-    return {getPlayerInfo}
-}
+    const checkWin = (player) => {
+        const winCombinations = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+            [0, 4, 8], [2, 4, 6]             // diagonals
+        ]
+        
+        for (let i = 0; i < winCombinations.length; i++) {
+            const [a, b, c] = winCombinations[i]
+            if (board[a] === player && board[b] === player && board[c] === player) {
+                return true
+            }
+        }
 
-const Gameboard = () => {
-    const row = 3;
-    const col = 3;
-    const board = []
+        return false
+    }
 
-    // create game board
-    for (let i = 0; i < row; i++) {
-        board[i] = []
-        for (let j = 0; j < col; j++) {
-            board[i].push(Cell())
+    const checkTie = () => {
+        return board.every(cell => cell !== "")
+    }
+
+    const resetBoard = () => {
+        for (let i = 0; i < board.length; i++) {
+            board[i] = ""
         }
     }
 
-    // get game board
-    const getBoard = () => board
+    return {makeMove, checkWin, checkTie, resetBoard, board}
+}
 
-    // This will be used to print the current state of the 
-    const printBoard = () => {
-       const boardWithValues = board.map(row => row.map(cell => cell.getValue()))
-       console.log(boardWithValues)
+const GameController = (() => {
+    let gameBoard = GameBoard()
+    let currentPlayer = "close"
+    let gameOver = false 
+
+    const boardSquares = document.querySelectorAll(".square")
+    const messageDisplay = document.querySelector(".message")
+
+    const updateUI = (index) => {
+        const markerIcon = document.createElement("span")
+        markerIcon.classList.add("material-symbols-outlined")
+        markerIcon.setAttribute("style", "color: #43291F")
+        markerIcon.textContent = currentPlayer
+        boardSquares[index].appendChild(markerIcon)
     }
 
-    const addMarker = (player, row, col) => {
-        let cell = board[row][col]
-        if (cell.getValue() !== 0) {
-            console.log("Invalid cell")
-        } else {
-            cell.setValue(player["markerId"])
-            console.log(`${player["name"]} added a marker at row:${row} col:${col}`)
-            printBoard()   
+    const switchPlayers = () => {
+        currentPlayer = currentPlayer === "close" ? "radio_button_unchecked" : "close"
+    }
+
+    const endGame = (message) => {
+        messageDisplay.textContent = message
+        gameOver = true
+    }
+
+    const handleMove = (event) => {
+        const squareIndex = Number(event.target["id"])
+
+        if (gameOver || gameBoard.board[squareIndex] !== "") {
+            return
         }
+
+        gameBoard.makeMove(currentPlayer, squareIndex)
+        updateUI(squareIndex)
+
+        if (gameBoard.checkWin(currentPlayer)) {
+            endGame(`${currentPlayer} wins!`)
+            return
+        }
+
+        if (gameBoard.checkTie()) {
+            endGame("It's a tie!")
+            return
+        }
+
+        switchPlayers();
+        messageDisplay.textContent = `${currentPlayer}'s turn`
     }
 
-    return {getBoard, printBoard, addMarker}
-}
+    const resetGame = () => {
+        gameBoard.resetBoard()
+        currentPlayer = "close"
+        gameOver = false
+        messageDisplay.textContent = `${currentPlayer}'s turn`
+        boardSquares.forEach(cell => cell.textContent = "")
+    }
 
-const GameController = () => {
-    const board = Gameboard()
-    const playerOneObj = Player("John", 1)
-    const playerTwoObj = Player("Mary", 2)
-
-    console.log(board.printBoard())
-    console.log(playerOneObj.getPlayerInfo())
-    console.log(playerTwoObj.getPlayerInfo()) 
-
-    return {board, playerOneObj, playerTwoObj}
-}
-
-
-const game = GameController()
+    boardSquares.forEach(cell => {
+        cell.addEventListener("click", (event) => {
+            handleMove(event)
+        })
+    })
+})();
