@@ -1,5 +1,7 @@
 // Board squares
 const boardSquares = document.querySelectorAll(".square")
+let crossBtn = document.querySelector(".cross")
+let circleBtn = document.querySelector(".circle")
 
 const Player = () => {
     const makeMove = (x, y) => {
@@ -41,6 +43,20 @@ const GameBoard = (() => {
 
 const NewGame = (() => {
     console.log("Game Started!")
+    crossBtn.addEventListener("click", (event) => {
+        circleBtn.classList.remove("fill")
+        event.target.classList.add("fill")
+        circleBtn.setAttribute("disabled", "true")
+        event.target.setAttribute("disabled", "true")
+    })
+
+    circleBtn.addEventListener("click", (event) => {
+        crossBtn.classList.remove("fill")
+        event.target.classList.add("fill")
+        crossBtn.setAttribute("disabled", "true")
+        event.target.setAttribute("disabled", "true")
+    })
+
     boardSquares.forEach(item => {
         item.addEventListener("click", (event) => {
             // radio_button_unchecked or close
