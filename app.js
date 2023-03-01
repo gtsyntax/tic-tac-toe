@@ -3,72 +3,68 @@ const boardSquares = document.querySelectorAll(".square")
 let crossBtn = document.querySelector(".cross")
 let circleBtn = document.querySelector(".circle")
 
-const Player = () => {
-    const makeMove = (x, y) => {
-        GameBoard.addMark(x, y)
-    }
-
-    return {makeMove}
+const Cell = () => {
+    let value = 0
+    const getValue = () => value 
+    const setValue = val => value = val
+    return {getValue, setValue}
 }
 
-const GameBoard = (() => {
-    let curr = "O"
-    let gameBoard = [
-        ["-", "-", "-"],
-        ["-", "-", "-"],
-        ["-", "-", "-"]
-    ]
+const Player = (name, markerId) => {
+    const getPlayerInfo = () => {
+        return {name, markerId}
+    }
 
-    const displayBoard = () => {
-        for (let i = 0; i < gameBoard.length; i++) {
-            console.log(...gameBoard[i])
+    return {getPlayerInfo}
+}
+
+const Gameboard = () => {
+    const row = 3;
+    const col = 3;
+    const board = []
+
+    // create game board
+    for (let i = 0; i < row; i++) {
+        board[i] = []
+        for (let j = 0; j < col; j++) {
+            board[i].push(Cell())
         }
     }
 
-    const addMark = (x, y) => {
-        if (gameBoard[x][y] === "-") {
-            gameBoard[x][y] = curr
-            curr = curr === "O" ? "X" : "O"
-            GameBoard.displayBoard()
+    // get game board
+    const getBoard = () => board
+
+    // This will be used to print the current state of the 
+    const printBoard = () => {
+       const boardWithValues = board.map(row => row.map(cell => cell.getValue()))
+       console.log(boardWithValues)
+    }
+
+    const addMarker = (player, row, col) => {
+        let cell = board[row][col]
+        if (cell.getValue() !== 0) {
+            console.log("Invalid cell")
         } else {
-            console.log("Not a valid move")
-            GameBoard.displayBoard()
+            cell.setValue(player["markerId"])
+            console.log(`${player["name"]} added a marker at row:${row} col:${col}`)
+            printBoard()   
         }
     }
 
-    return {displayBoard, addMark}
+    return {getBoard, printBoard, addMarker}
+}
+
+const GameController = () => {
+    const board = Gameboard()
+    const playerOneObj = Player("John", 1)
+    const playerTwoObj = Player("Mary", 2)
+
+    console.log(board.printBoard())
+    console.log(playerOneObj.getPlayerInfo())
+    console.log(playerTwoObj.getPlayerInfo()) 
+
+    return {board, playerOneObj, playerTwoObj}
+}
 
 
-})();
-
-const NewGame = (() => {
-    console.log("Game Started!")
-    crossBtn.addEventListener("click", (event) => {
-        circleBtn.classList.remove("fill")
-        event.target.classList.add("fill")
-        circleBtn.setAttribute("disabled", "true")
-        event.target.setAttribute("disabled", "true")
-    })
-
-    circleBtn.addEventListener("click", (event) => {
-        crossBtn.classList.remove("fill")
-        event.target.classList.add("fill")
-        crossBtn.setAttribute("disabled", "true")
-        event.target.setAttribute("disabled", "true")
-    })
-
-    boardSquares.forEach(item => {
-        item.addEventListener("click", (event) => {
-            // radio_button_unchecked or close
-            // #226F54 or #43291F
-            const marker = document.createElement("span")
-            marker.classList.add("material-symbols-outlined")
-            marker.setAttribute("style", "color:#43291F")
-            marker.textContent = "radio_button_unchecked"
-            
-            event.target.appendChild(marker)
-        })
-    })
-
-
-})();
+const game = GameController()
